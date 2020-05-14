@@ -49,7 +49,11 @@ app.get('/version', (req, res) => {
 
 
 function deleteEvents(req, res, id) {
-    firestore.collection("Events").doc(id).delete();
+    firestore.collection("Events").doc(id).delete()
+    .catch((err) => {
+            console.error('Error deleteing event', err);
+            res.json(mockEvents);
+        });
     console.log("delete func");
 };
 
@@ -100,6 +104,7 @@ app.post('/event', (req, res) => {
         description: req.body.description,
         location: req.body.location
      }
+
 // this will create the Events collection if it does not exist
     firestore.collection("Events").add(ev).then(ret => {
         getEvents(req, res);
@@ -107,15 +112,12 @@ app.post('/event', (req, res) => {
 
 });
 
-app.delete('/event', (req, res) => {
-    // create a new object from the json data and add an id
-   // create a new object from the json data and add an id
+app.post('/delEvent', (req, res) => { 
     
-    // id: req.body.id;
-    // deleteEvents(req, res, id);
-    deleteEvents(req, res, "uhZFLxvPbIpi4ys7uN4b");
-    // console.log(id);
-   // console.log(req.body.id);
+     deleteEvents(req, res, req.body.id);
+
+    res.redirect('/');
+    
 });
 
 
