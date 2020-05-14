@@ -29,8 +29,8 @@ app.use(bodyParser.json());
 // from a cloud data store
 const mockEvents = {
     events: [
-        { title: 'an event', id: 1, description: 'something really cool', location: "Bangalore" },
-        { title: 'another event', id: 2, description: 'something even cooler', location: "Hyderabad" }
+        { title: 'an event', id: 1, description: 'something really cool', location: "Bangalore", like: 0 },
+        { title: 'another event', id: 2, description: 'something even cooler', location: "Hyderabad", like: 0 }
     ]
 };
 
@@ -57,6 +57,27 @@ function deleteEvents(req, res, id) {
     console.log("delete func");
 };
 
+function addLike(req, res, id){
+    
+    let evRef=firestore.collection("Events").doc(id);
+    let getDoc= evRef.get()
+       .then(el => {
+           
+            if (!el.exists) {
+                console.log('No such document!');
+                } else {
+                console.log('Document data:', el.data().like);
+                 firestore.collection("Events").doc(id)
+                    .update({
+                        "like": el.data().like + 1 
+                    });
+                }
+            })
+            .catch(err => {
+                console.log('Error getting document', err);
+            });
+
+}
 
 function getEvents(req, res) {
     firestore.collection("Events").get()
@@ -91,7 +112,11 @@ app.get('/events', (req, res) => {
      console.log("get events");
 });
 
+app.get('/editEvents', (req, res) => {
+     getEvents(req, res);
 
+     console.log("get events");
+});
 
 // Adds an event - in a real solution, this would insert into a cloud datastore.
 // Currently this simply adds an event to the mock array in memory
@@ -102,7 +127,8 @@ app.post('/event', (req, res) => {
     const ev = { 
         title: req.body.title, 
         description: req.body.description,
-        location: req.body.location
+        location: req.body.location,
+        like: parseInt(req.body.like)
      }
 
 // this will create the Events collection if it does not exist
@@ -116,6 +142,27 @@ app.post('/delEvent', (req, res) => {
     
      deleteEvents(req, res, req.body.id);
 
+    res.redirect('/');
+    
+});
+
+app.post('/like', (req, res) => { 
+    
+    console.log("###########33");
+     
+
+    addLike(req,res,req.body.id);
+    console.log("#################")
+
+    // const ev = { 
+    //     title: firestore.collection("Events").doc(req.body.id).title, 
+    //     description: firestore.collection("Events").doc(req.body.id).description,
+    //     location: firestore.collection("Events").doc(req.body.id).location,
+    //     like: parseInt(firestore.collection("Events").doc(req.body.id).like) + 1
+    //  }
+    //  firestore.collection("Events").add(ev);
+
+     
     res.redirect('/');
     
 });
