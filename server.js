@@ -66,7 +66,7 @@ function addLike(req, res, id){
             if (!el.exists) {
                 console.log('No such document!');
                 } else {
-                console.log('Document data:', el.data().like);
+                console.log('Event :', el.data().like);
                  firestore.collection("Events").doc(id)
                     .update({
                         "like": el.data().like + 1 
@@ -75,6 +75,27 @@ function addLike(req, res, id){
             })
             .catch(err => {
                 console.log('Error getting document', err);
+            });
+
+}
+
+function getEvent(req, res, id){
+    
+    let evRef=firestore.collection("Events").doc(id);
+    let getDoc= evRef.get()
+       .then(el => {
+           
+            if (!el.exists) {
+                console.log('No such Event!');
+                } else {                
+                 let ev= el.data();
+                 ev.id=id;
+                 console.log("$$$$$$$$$$$$ event : ",ev);
+                 res.json(ev);
+                }
+            })
+            .catch(err => {
+                console.log('Error getting event', err);
             });
 
 }
@@ -92,7 +113,7 @@ function getEvents(req, res) {
                     //add object to array
                     ret.events.push(el);
                 }, this);
-                console.log(ret);
+                //console.log(ret);
                 res.json(ret);
             } else {
                  res.json(mockEvents);
@@ -112,15 +133,6 @@ app.get('/events', (req, res) => {
      console.log("get events");
 });
 
-app.get('/editEvents', (req, res) => {
-     getEvents(req, res);
-
-     console.log("get events");
-});
-
-// Adds an event - in a real solution, this would insert into a cloud datastore.
-// Currently this simply adds an event to the mock array in memory
-// this will produce unexpected behavior in a stateless kubernetes cluster. 
 app.post('/event', (req, res) => {
     // create a new object from the json data and add an id
    // create a new object from the json data and add an id
@@ -138,6 +150,53 @@ app.post('/event', (req, res) => {
 
 });
 
+app.post('/getEvent', (req, res) => {
+    
+    console.log(req.body);
+    
+     getEvent(req, res, req.body.id);
+     console.log("get event");
+});
+
+
+// Adds an event - in a real solution, this would insert into a cloud datastore.
+// Currently this simply adds an event to the mock array in memory
+// this will produce unexpected behavior in a stateless kubernetes cluster. 
+app.post('/updateEvent', (req, res) => {
+    // create a new object from the json data and add an id
+   // create a new object from the json data and add an id
+    console.log("@@@@@@@@@@@@@@");
+    console.log(req.body);
+
+    firestore.collection("Events").doc(req.body.id)
+                    .update({
+                        "title": req.body.title,
+                        "description": req.body.description,
+                        "location":req.body.location,
+                        "like": req.body.like
+                    });
+
+    // let evRef=firestore.collection("Events").doc(req.body.id);
+    // let getDoc= evRef.get()
+    //    .then(el => {
+           
+    //         if (!el.exists) {
+    //             console.log('No such document!');
+    //             } else {
+    //             console.log('Event :', el.data());
+                 
+    //             }
+    //         })
+    //         .catch(err => {
+    //             console.log('Error getting document', err);
+    //         });
+
+
+
+
+    res.redirect('/');
+});
+
 app.post('/delEvent', (req, res) => { 
     
      deleteEvents(req, res, req.body.id);
@@ -148,21 +207,8 @@ app.post('/delEvent', (req, res) => {
 
 app.post('/like', (req, res) => { 
     
-    console.log("###########33");
-     
-
     addLike(req,res,req.body.id);
-    console.log("#################")
-
-    // const ev = { 
-    //     title: firestore.collection("Events").doc(req.body.id).title, 
-    //     description: firestore.collection("Events").doc(req.body.id).description,
-    //     location: firestore.collection("Events").doc(req.body.id).location,
-    //     like: parseInt(firestore.collection("Events").doc(req.body.id).like) + 1
-    //  }
-    //  firestore.collection("Events").add(ev);
-
-     
+    
     res.redirect('/');
     
 });
