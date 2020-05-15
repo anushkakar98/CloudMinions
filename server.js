@@ -29,8 +29,8 @@ app.use(bodyParser.json());
 // from a cloud data store
 const mockEvents = {
     events: [
-        { title: 'an event', id: 1, description: 'something really cool', location: "Bangalore", like: 0 },
-        { title: 'another event', id: 2, description: 'something even cooler', location: "Hyderabad", like: 0 }
+        { title: 'an event', id: 1, description: 'something really cool', location: "Bangalore", like: 0, date: '2020-05-16' },
+        { title: 'another event', id: 2, description: 'something even cooler', location: "Hyderabad", like: 0, date: '2020-05-16' }
     ]
 };
 
@@ -140,8 +140,11 @@ app.post('/event', (req, res) => {
         title: req.body.title, 
         description: req.body.description,
         location: req.body.location,
-        like: parseInt(req.body.like)
+        like: parseInt(req.body.like),
+        date: req.body.date
      }
+     console.log("############");
+     console.log(req.body);
 
 // this will create the Events collection if it does not exist
     firestore.collection("Events").add(ev).then(ret => {
@@ -173,7 +176,8 @@ app.post('/updateEvent', (req, res) => {
                         "title": req.body.title,
                         "description": req.body.description,
                         "location":req.body.location,
-                        "like": req.body.like
+                        "like": req.body.like,
+                        "date": req.body.date
                     });
 
     // let evRef=firestore.collection("Events").doc(req.body.id);
